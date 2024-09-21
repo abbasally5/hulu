@@ -979,3 +979,80 @@ type Config struct {
 	CriterionCollection int    `json:"criterion_collection"`
 	KeyID               int    `json:"key_id"`
 }
+
+type HttpHeaders struct {
+	UserAgent      string `json:"User-Agent"`
+	Accept         string `json:"Accept"`
+	AcceptLanguage string `json:"Accept-Language"`
+	SecFetchMode   string `json:"Sec-Fetch-Mode"`
+}
+
+type Format struct {
+	FormatID             string      `json:"format_id"`
+	ManifestURL          string      `json:"manifest_url"`
+	Ext                  string      `json:"ext"`
+	Width                *int        `json:"width"`
+	Height               *int        `json:"height"`
+	Tbr                  float64     `json:"tbr"`
+	Asr                  int         `json:"asr"`
+	Fps                  *float64    `json:"fps"`
+	Language             string      `json:"language"`
+	FormatNote           string      `json:"format_note"`
+	Filesize             *int        `json:"filesize"`
+	Container            string      `json:"container"`
+	Vcodec               string      `json:"vcodec"`
+	Acodec               string      `json:"acodec"`
+	DynamicRange         *string     `json:"dynamic_range"`
+	HasDrm               bool        `json:"has_drm"`
+	URL                  string      `json:"url"`
+	ManifestStreamNumber int         `json:"manifest_stream_number"`
+	IsDashPeriods        bool        `json:"is_dash_periods"`
+	Protocol             string      `json:"protocol"`
+	Resolution           string      `json:"resolution"`
+	AspectRatio          *float64    `json:"aspect_ratio"`
+	HttpHeaders          HttpHeaders `json:"http_headers"`
+	AudioExt             string      `json:"audio_ext"`
+	VideoExt             string      `json:"video_ext"`
+	Vbr                  float64     `json:"vbr"`
+	Abr                  float64     `json:"abr"`
+	Format               string      `json:"format"`
+}
+
+type Version struct {
+	Version        string  `json:"version"`
+	CurrentGitHead *string `json:"current_git_head"`
+	ReleaseGitHead string  `json:"release_git_head"`
+	Repository     string  `json:"repository"`
+}
+
+type Manifest struct {
+	ID                 string   `json:"id"`
+	Title              string   `json:"title"`
+	Timestamp          *string  `json:"timestamp"`
+	Formats            []Format `json:"formats"`
+	Format             string   `json:"format"`
+	FormatID           string   `json:"format_id"`
+	Ext                string   `json:"ext"`
+	Protocol           string   `json:"protocol"`
+	Language           string   `json:"language"`
+	FormatNote         string   `json:"format_note"`
+	FilesizeApprox     *int     `json:"filesize_approx"`
+	Tbr                float64  `json:"tbr"`
+	Width              int      `json:"width"`
+	Height             int      `json:"height"`
+	Resolution         string   `json:"resolution"`
+	Fps                *float64 `json:"fps"`
+	DynamicRange       string   `json:"dynamic_range"`
+	Vcodec             string   `json:"vcodec"`
+	Vbr                float64  `json:"vbr"`
+	StretchedRatio     *string  `json:"stretched_ratio"`
+	AspectRatio        float64  `json:"aspect_ratio"`
+	Acodec             string   `json:"acodec"`
+	Abr                float64  `json:"abr"`
+	Asr                int      `json:"asr"`
+	AudioChannels      *int     `json:"audio_channels"`
+	Filename           string   `json:"filename"`
+	FilenameUnderscore string   `json:"_filename"`
+	Type               string   `json:"_type"`
+	Version            Version  `json:"_version"`
+}

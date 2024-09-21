@@ -3,15 +3,18 @@ package main
 import (
 	"bytes"
 	"encoding/hex"
+	"encoding/json"
 	"fmt"
-	"github.com/abbasally5/hulu/hulu"
-	"github.com/abbasally5/hulu/widevine"
 	"io"
-	"lukechampine.com/flagg"
 	"net/http"
 	"os"
+	"os/exec"
 	"text/tabwriter"
 	"time"
+
+	"github.com/abbasally5/hulu/hulu"
+	"github.com/abbasally5/hulu/widevine"
+	"lukechampine.com/flagg"
 )
 
 func main() {
@@ -90,25 +93,30 @@ download [id] - prints the MPD url the video is available at and returns the mp4
 			return
 		}
 
+		fmt.Println("a")
 		playbackInformation, err := client.PlaybackInformation(*downloadID)
 		if err != nil {
 			panic(err)
 		}
 
+		fmt.Println("b")
 		serverConfig, err := client.ServerConfig()
 		if err != nil {
 			panic(err)
 		}
 
+		fmt.Println("c")
 		playlist, err := client.Playlist(serverConfig.KeyID, playbackInformation.EabID)
 		if err != nil {
 			panic(err)
 		}
 
+		fmt.Println("d")
 		client := &http.Client{
 			Timeout: 10 * time.Second,
 		}
 
+		fmt.Println("e")
 		// request MPD file
 		response, err := client.Get(playlist.StreamURL)
 		if err != nil {
@@ -116,22 +124,56 @@ download [id] - prints the MPD url the video is available at and returns the mp4
 		}
 		defer response.Body.Close()
 
+		fmt.Println("f")
 		// parse init data/PSSH from XML
 		initData, err := widevine.InitDataFromMPD(response.Body)
 		if err != nil {
-			panic(err)
+			//panic(err)
+			fmt.Println("initData is empty")
+
+			// Get data from mp4 file
+			fmt.Println("MPD URL: ", playlist.StreamURL)
+			ytDlpCmd := exec.Command("yt-dlp", "--allow-unplayable-formats", "-j", playlist.StreamURL)
+			var ytDlpOutput bytes.Buffer
+			ytDlpCmd.Stdout = &ytDlpOutput
+			err := ytDlpCmd.Run()
+			if err != nil {
+				fmt.Println("error executing yt-dlp available formats command")
+				panic(err)
+			}
+			var ytDlpManifest hulu.Manifest
+			err = json.NewDecoder(&ytDlpOutput).Decode(&ytDlpManifest)
+			if err != nil {
+				fmt.Println("error decoding json from yt-dlp")
+				panic(err)
+			}
+			fmt.Printf("num formats: %d", len(ytDlpManifest.Formats))
+			for _, f := range ytDlpManifest.Formats {
+				if f.Container == "mp4_dash" {
+					mp4Response, err := client.Get(f.URL)
+					if err != nil {
+						fmt.Println("error making mp4 file request")
+						fmt.Println(f.URL)
+						panic(err)
+					}
+
+				}
+			}
 		}
 
+		fmt.Println("g")
 		cdm, err := widevine.NewDefaultCDM(initData)
 		if err != nil {
 			panic(err)
 		}
 
+		fmt.Println("h")
 		licenseRequest, err := cdm.GetLicenseRequest()
 		if err != nil {
 			panic(err)
 		}
 
+		fmt.Println("i")
 		request, err := http.NewRequest(http.MethodPost, playlist.WvServer, bytes.NewReader(licenseRequest))
 		if err != nil {
 			panic(err)
@@ -150,12 +192,14 @@ download [id] - prints the MPD url the video is available at and returns the mp4
 			panic(err)
 		}
 
+		fmt.Println("j")
 		// parse keys from response
 		keys, err := cdm.GetLicenseKeys(licenseRequest, licenseResponse)
 		if err != nil {
 			panic(err)
 		}
 
+		fmt.Println("k")
 		command := "mp4decrypt input.mp4 output.mp4"
 		for _, key := range keys {
 			if key.Type == widevine.License_KeyContainer_CONTENT {

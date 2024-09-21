@@ -5,6 +5,7 @@ import (
 	"encoding/base64"
 	"encoding/xml"
 	"errors"
+	"fmt"
 	"io"
 	"net/http"
 )
@@ -86,6 +87,8 @@ func InitDataFromMPD(r io.Reader) ([]byte, error) {
 	const widevineSchemeIdURI = "urn:uuid:edef8ba9-79d6-4ace-a3c8-27dcd51d21ed"
 	for _, adaptionSet := range mpdPlaylist.Period.AdaptationSet {
 		for _, protection := range adaptionSet.ContentProtection {
+			fmt.Println(protection.SchemeIdUri)
+			fmt.Println(protection.Pssh)
 			if protection.SchemeIdUri == widevineSchemeIdURI && len(protection.Pssh) > 0 {
 				return base64.StdEncoding.DecodeString(protection.Pssh)
 			}
@@ -94,6 +97,8 @@ func InitDataFromMPD(r io.Reader) ([]byte, error) {
 	for _, adaptionSet := range mpdPlaylist.Period.AdaptationSet {
 		for _, representation := range adaptionSet.Representation {
 			for _, protection := range representation.ContentProtection {
+				fmt.Println(protection.SchemeIdUri)
+				fmt.Println(protection.Pssh.Text)
 				if protection.SchemeIdUri == widevineSchemeIdURI && len(protection.Pssh.Text) > 0 {
 					return base64.StdEncoding.DecodeString(protection.Pssh.Text)
 				}
